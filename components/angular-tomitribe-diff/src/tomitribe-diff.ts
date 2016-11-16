@@ -1,5 +1,4 @@
 import 'core-js/es6';
-import { codemirror } from 'codemirror/lib/codemirror.js';
 
 /**
  * @ngdoc directive
@@ -35,6 +34,7 @@ module tomitribe_diff {
                 }
                 $timeout(() => scope.$apply(() => scope['loaded'] = true));
             };
+            let codemirror = require('codemirror/lib/codemirror.js');
             scope.$watch('valueA', checkLoaded);
             scope.$watch('valueB', checkLoaded);
             scope.$watch('loaded', () => {
@@ -77,5 +77,5 @@ module tomitribe_diff {
     }
 
     angular.module('angular-tomitribe-diff', [])
-        .directive('tribeDiff', new tribeDiff());
+        .directive('tribeDiff',['$document', '$timeout', ($document, $timeout) =>  new tribeDiff()]);
 }

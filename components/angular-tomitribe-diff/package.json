@@ -4,10 +4,9 @@
   "description": "Tomictribe component",
   "repository": "https://github.com/Dexmaster/mykola/tree/master/components/angular-tomitribe-diff",
   "license": "MIT",
-  "peerDependencies": {
+  "dependencies": {
     "angular": "^1.5.8",
     "typescript": "^2.0.8",
-    "codemirror": "^5.19.0",
-    "core-js":
+    "codemirror": "^5.19.0"
   }
 }
