@@ -6,4 +6,4 @@ typings/
 *.cache
 
 .idea/
-.dist/
+dist/
