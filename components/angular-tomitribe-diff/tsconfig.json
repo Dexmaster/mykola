@@ -8,16 +8,5 @@
     "experimentalDecorators": true,
     "removeComments": false,
     "noImplicitAny": false
-  },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "filesGlob": [
-    "typings/index.d.ts",
-    "./src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ]
+  }
 }

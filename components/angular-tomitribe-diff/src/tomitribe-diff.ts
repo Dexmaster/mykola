@@ -1,8 +1,18 @@
 import 'core-js/es6';
 
+/**
+ * @ngdoc directive
+ * @name angular-diff.directive:tribeDiff
+ * @function
+ *
+ * @description
+ * Inititates codemirror instance and connects it to attribute values
+ *
+ * @example
+    div(data-tribe-diff, x-ng-show="showDiff", data-title-a="titleA", data-value-a="valueA", data-title-b="titleB", data-value-b="valueB", data-mode="application/json")
+ */
 module tomitribe_diff {
-    var angular: any;
-    let codemirror = require("../bower_components/codemirror/lib/codemirror.js");
+    let codemirror = require("codemirror/lib/codemirror.js");
 
     angular.module('angular-tomitribe-diff', [])
     .directive('tribeDiff', ['$document', '$timeout', ($document, $timeout) => {
