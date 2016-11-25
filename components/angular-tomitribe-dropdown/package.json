@@ -1,11 +1,11 @@
 {
   "name": "angular-tomitribe-dropdown",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Tomitribe component dropdown list",
   "repository": "https://github.com/tomitribe/mykola/tree/master/components/angular-tomitribe-dropdown",
   "license": "MIT",
   "main": "index.ts",
   "dependencies": {
-    "angular-tomitribe-common": "^0.0.4"
+    "angular-tomitribe-common": "^0.0.3"
   }
 }
