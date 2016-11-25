@@ -139,7 +139,7 @@ module tomitribe_dropdown {
 
         function link(scope, element, attrs, ctrl)
         {
-            scope.parentCtrl = ctrl;
+            scope.$dropdown = ctrl;
         }
     }
 }
