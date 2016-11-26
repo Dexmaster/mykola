@@ -8,7 +8,7 @@
     .dropdown-list
       display: block
     .dropdown-primary .bimg
-      background-image: url(./images/threeDots-icon-orange.png)
+      background-image: url(images/threeDots-icon-orange.svg)
   .dropdown-primary
     width: 30px
     height: 40px
@@ -16,10 +16,11 @@
     vertical-align: middle
     .bimg
       background-repeat: no-repeat
-      background-position: right center
-      background-image: url(./images/threeDots-icon.png)
+      background-position: center center
+      background-size: 19px 4px
+      background-image: url(./images/threeDots-icon-grey.svg)
       &:hover
-        background-image: url(./images/threeDots-icon-orange.png)
+        background-image: url(images/threeDots-icon-orange.svg)
     + .dropdown-list-down
       top: 40px
       &:before,
@@ -43,13 +44,13 @@
         text-align: left
         &:before,
         &:after
-          left: 8px
+          left: 7px
       &.pull-left
         right: -11px
         text-align: right
         &:before,
         &:after
-          right: 8px
+          right: 10px
     + .dropdown-list-up
       bottom: 40px
       &:before,
@@ -73,13 +74,13 @@
         text-align: left
         &:before,
         &:after
-          left: 8px
+          left: 7px
       &.pull-left
         right: -11px
         text-align: right
         &:before,
         &:after
-          right: 8px
+          right: 10px
     i
       display: inline-block
       width: 30px
@@ -111,9 +112,9 @@
         cursor: pointer
         background-color: $orange
     .disabled
-      color: #A8A9AA
+      color: $grey
       &:hover
-        color: #A8A9AA
+        color: $grey
         cursor: default
         background-color: inherit
     .separator

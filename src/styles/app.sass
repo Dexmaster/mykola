@@ -3,6 +3,11 @@ body
   font-family: Montserrat, sans-serif
   font-weight: bold
   text-transform: uppercase
+  .column
+    &:nth-child(3)
+      background: repeating-linear-gradient(45deg, #333 0px, #333 3px, #000 3px, #000 6px)
+      > div
+        color: #FFF
 .alegreya
   font-family: 'Alegreya Sans', sans-serif
 .btn-primary.btn-l span
@@ -23,18 +28,18 @@ body
   .bimg
     background-repeat: no-repeat
     background-position: right center
-    background-image: url(../images/threeDots-icon.png)
-    &:hover
-      background-image: url(../images/threeDots-icon-orange.png)
-  .open .bimg
-    background-image: url(../images/threeDots-icon-orange.png)
+    background-size: 19px 4px
+    background-image: url(../images/ellipsis-icon.svg)
+    &.trigger
+      right: 15px
+      box-sizing: border-box
 .outside-trigger
   left: 0
   position: absolute
 .dropdown .dropdown-list .item
   font-size: 11px
   font-family: Lato, sans-serif
-  font-weight: bold
+  font-weight: 400
   text-transform: none
 .clear
   clear: both

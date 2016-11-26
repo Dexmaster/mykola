@@ -43,7 +43,7 @@ div
         div {{menuThreeStatus ? 'true' : 'false'}}
         tribe-fab(fab-direction='left' fab-trigger='fabOver' trigger-hide='true' opened-status='menuThreeStatus')
           tribe-fab-trigger
-            i.rt.bimg
+            i.trigger.bimg
           tribe-fab-actions
             tribe-button(tribe-size='s', tribe-type='icon', tribe-tooltip='User', tribe-tooltip-position='left')
               i.fa.fa-id-card
@@ -55,9 +55,9 @@ div
               i.fa.fa-trash
     div.clear.row
       div.column.pull-right
-        tribe-dropdown(dropdown-direction='up' pull-direction='right'  dropdown-trigger='dropdownClick' opened-status='dropDownTwoStatus')
+        tribe-dropdown(dropdown-direction='up' pull-direction='left'  dropdown-trigger='dropdownClick' opened-status='dropDownTwoStatus')
           tribe-dropdown-trigger
-            i.bimg(style="font-size: 25px;")
+            i.bimg
           tribe-dropdown-list
             .item Hello
             .item World

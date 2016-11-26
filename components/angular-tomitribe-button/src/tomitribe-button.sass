@@ -77,11 +77,9 @@
       background-color: darken(map-get($colors, $color), 50%)
 
   @if $type == 'flat' or $type == 'icon'
-    color: map-get($colors, $color)
-    .ripple
-      background-color: map-get($colors, $color)
+    color: map-get($icon-colors, $color)
     &:hover
-      color: map-get($colors, '#{$color}-hue-1')
+      color: map-get($icon-colors, '#{$color}-hue-1')
 
 @mixin btn-type($type)
   @if $type == 'raised' or $type == 'flat'

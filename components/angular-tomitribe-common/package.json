@@ -1,6 +1,6 @@
 {
   "name": "angular-tomitribe-common",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Tomitribe common mixins for styling",
   "repository": "https://github.com/tomitribe/mykola/tree/master/components/angular-tomitribe-common",
   "license": "MIT",
