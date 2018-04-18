@@ -3,6 +3,8 @@ import * as angular from 'angular';
 
 import "./styles/app.sass";
 
+import { LongDuration, TimeUtils } from "../components/ts-tomitribe-util/index";
+
 let _ = require('underscore');
 
 module index {
@@ -273,6 +275,30 @@ module index {
                             $scope.ages = [1, 2, 5, 10, 25, 35, 100];
                             $scope.myAge11 = 2;
                             $scope.agesPaginated = [];
+                            $scope.sampleObjects = [
+                                {
+                                    name: "object 1",
+                                    value: "1"
+                                },
+                                {
+                                    name: "object 2",
+                                    value: "2"
+                                },
+                                {
+                                    name: "object 3",
+                                    value: "3"
+                                },
+                                {
+                                    name: "object 4",
+                                    value: "4"
+                                }
+                            ];
+
+                            $scope.allowTabCondition = true;
+
+                            $scope.executeSelectFetchOnOpen = () => {
+                                console.log("Executing executeSelectFetchOnOpen");
+                            }
 
                             // Issue with ui-select multiple
                             // [ui.select:choices] Expected multiple .ui-select-choices-row but got '0'
@@ -302,6 +328,46 @@ module index {
 
                             $scope.taggingCallback = (v) => {
                             }
+                        }]
+                    })
+                    .when('/utils', {
+                        template: require('./templates/utils.jade'),
+                        controller: ['$scope', ($scope) => {
+                            $scope.aString = "30 hours, 10 minutes and 60 seconds";
+                            $scope.aObject = new LongDuration($scope.aString);
+
+                            $scope.bString = "23m, 26 seconds and 1000ms";
+                            $scope.bObject = new LongDuration($scope.bString);
+
+                            $scope.fObject = {
+                                a: $scope.aObject.formatHighest(),
+                                b: $scope.bObject.formatHighest()
+                            };
+
+                            $scope.nObject = new LongDuration.Normalize(new LongDuration($scope.fObject.a), new LongDuration($scope.fObject.b));
+
+                            $scope.abObject = {
+                                a: TimeUtils.abbreviate($scope.fObject.a),
+                                b: TimeUtils.abbreviate($scope.fObject.b)
+                            };
+
+                            $scope.$watch('aString', (n, o) => {
+                                if (n && n !== o) {
+                                    $scope.aObject.parseLongDuration($scope.aString);
+                                    $scope.fObject.a = $scope.aObject.formatHighest();
+                                    $scope.abObject.a = TimeUtils.abbreviate($scope.fObject.a);
+                                    $scope.nObject = new LongDuration.Normalize(new LongDuration($scope.fObject.a), new LongDuration($scope.fObject.b));
+                                }
+                            });
+
+                            $scope.$watch('bString', (n, o) => {
+                                if (n && n !== o) {
+                                    $scope.bObject.parseLongDuration($scope.bString);
+                                    $scope.fObject.b = $scope.bObject.formatHighest();
+                                    $scope.abObject.b = TimeUtils.abbreviate($scope.fObject.b);
+                                    $scope.nObject = new LongDuration.Normalize(new LongDuration($scope.fObject.a), new LongDuration($scope.fObject.b));
+                                }
+                            });
                         }]
                     })
                     .otherwise({

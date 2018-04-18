@@ -31,7 +31,7 @@ module tomitribe_fab {
                 closeSelector: '@?'
             },
             link: link,
-            controller: ['$scope', '$timeout', '$document', tribeFabController],
+            controller: ['$scope', '$timeout', '$document', '$rootScope', tribeFabController],
             controllerAs: 'tribeFab',
             transclude: true,
             replace: true
@@ -91,7 +91,7 @@ module tomitribe_fab {
                 //Remove tabindex from fab-primary
                 element.find('.fab-primary a').attr("tabindex", -1);
 
-                scope.onKeyDown = function ($event) {
+                scope.keyDown = function ($event, preventFocus?) {
                     if (($event.keyCode === 40 && !isOpen()) || ($event.keyCode === 39 && !isOpen()) || ($event.keyCode === 13 && isFocusOnTrigger())) {
                         //Arrow down || Arrow right || Enter -> Open
                         setMenuStatus(true, $event);
@@ -110,7 +110,7 @@ module tomitribe_fab {
 
                     } else if ($event.keyCode === 37 || $event.keyCode === 38 || $event.keyCode === 27) {
                         //Arrow left || Arrow Up || ESC  -> Close
-                        setMenuStatus(false, $event);
+                        setMenuStatus(false, $event, preventFocus);
 
                     } else if ($event.keyCode === 13 && !isFocusOnTrigger()) {
                         //Enter->  "click" in a menu option
@@ -169,9 +169,11 @@ module tomitribe_fab {
                 $event.preventDefault();
             }
 
-            function setMenuStatus(opened, $event) {
+            function setMenuStatus(opened, $event, preventFocus = false) {
                 scope.opened = opened;
-                setInitialState(true);
+                if(!preventFocus) {
+                    setInitialState(true);
+                }
                 $event.preventDefault();
             }
 
@@ -186,7 +188,7 @@ module tomitribe_fab {
         }
     }
 
-    function tribeFabController($scope, $timeout, $document) {
+    function tribeFabController($scope, $timeout, $document, $rootScope) {
         var tribeFab = this;
 
         tribeFab.init = init;
@@ -256,6 +258,9 @@ module tomitribe_fab {
                     $document.off('click', $scope.handler);
                 });
             }
+
+            let keyDownWatcher = $rootScope.$on('angular-tomitribe-fab.keyDown', (e, d) => $scope.keyDown(d, true));
+            $scope.$on('$destroy', () => keyDownWatcher());
         }
 
         function _checkStatus(newVal) {

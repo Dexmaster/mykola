@@ -85,7 +85,7 @@ module tomitribe_fab {
         tribeTooltip.calcTooltipPosition = calcTooltipPosition;
 
 
-        tribeTooltip.position = angular.isDefined(tribeTooltip.position) ? tribeTooltip.position : 'top';
+        tribeTooltip.position = angular.isDefined(tribeTooltip.position) ? tribeTooltip.position : 'top middle';
 
         $scope.$on('$destroy', function()
         {
@@ -126,43 +126,34 @@ module tomitribe_fab {
         function calcTooltipPosition() {
             if (!angular.isDefined(tribeTooltip) || !angular.isDefined(tooltip)) return;
 
+            let positions = tribeTooltip.position.split(' ');
+
+            if(positions.length === 1) {
+                positions.push("middle");
+            }
+
             var width = $element.outerWidth(),
                 height = $element.outerHeight(),
                 top = $element.offset().top,
                 left = $element.offset().left;
 
-            if (tribeTooltip.position === 'top')
-            {
-                tooltip.css(
-                    {
-                        left: left - (tooltip.outerWidth() / 2) + (width / 2),
-                        top: top - tooltip.outerHeight()
-                    });
+            let options = {
+                left: left - (tooltip.outerWidth() / 2) + (width / 2),
+                top: top + (height / 2) - (tooltip.outerHeight() / 2)
+            };
+
+            if (positions.indexOf('top') > -1 || positions.indexOf('bottom') > -1) {
+                options.top = positions.indexOf('top') > -1 ? top - tooltip.outerHeight() : top + height
             }
-            else if (tribeTooltip.position === 'bottom')
-            {
-                tooltip.css(
-                    {
-                        left: left - (tooltip.outerWidth() / 2) + (width / 2),
-                        top: top + height
-                    });
+            if (positions.indexOf('left') > -1 || positions.indexOf('right') > -1) {
+                if (positions.indexOf('top') > -1 || positions.indexOf('bottom') > -1) {
+                    options.left = positions.indexOf('left') > -1 ? left - (tooltip.outerWidth() / 2) : left + width - (tooltip.outerWidth() / 2);
+                } else {
+                    options.left = positions.indexOf('left') > -1 ? left - tooltip.outerWidth() : left + width
+                }
             }
-            else if (tribeTooltip.position === 'left')
-            {
-                tooltip.css(
-                    {
-                        left: left - tooltip.outerWidth(),
-                        top: top + (height / 2) - (tooltip.outerHeight() / 2)
-                    });
-            }
-            else if (tribeTooltip.position === 'right')
-            {
-                tooltip.css(
-                    {
-                        left: left + width,
-                        top: top + (height / 2) - (tooltip.outerHeight() / 2)
-                    });
-            }
+
+            tooltip.css(options);
         }
 
         function setTooltipPosition()
@@ -184,7 +175,7 @@ module tomitribe_fab {
 
                     tooltip = angular.element('<div/>',
                         {
-                            class: 'tooltip tooltip-' + tribeTooltip.position
+                            class: 'tooltip tooltip'+tribeTooltip.position.split(' ').map(i => '-'+i).join('')
                         });
 
                     tooltipLabel = angular.element('<span/>',

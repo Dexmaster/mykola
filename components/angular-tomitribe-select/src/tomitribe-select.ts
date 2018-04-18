@@ -10,6 +10,9 @@
  * tribeSelectFetchOnOpen: this directive refresh the list options, when the dropdown is opened
  *
  */
+
+import './tomitribe-select.scss';
+
 module tomitribe_select {
     let _ = require('underscore');
 
@@ -19,27 +22,37 @@ module tomitribe_select {
         .directive('tribeSelectOpenOnFocus', ['$timeout', tribeSelectOpenOnFocus])
         .directive('tribeSelectPreventTab', ['$timeout', tribeSelectPreventTab])
         .directive('tribeSelectFetchOnOpen', tribeSelectFetchOnOpen)
-        .directive('tribeSelectPaginationControl', tribeSelectPaginationControl)
-        .directive('tribeSelectPaginationLoader', tribeSelectPaginationLoader);
+        .directive('tribeSelectPaginationLoader', tribeSelectPaginationLoader)
+        .directive('tribeSelectSaveSearch', tribeSelectSaveSearch)
+        .directive('tribeSelectMaxLength', tribeSelectMaxLength)
+        .directive('tribeSelectRedrawOnTagging', tribeSelectRedrawOnTagging)
+        .directive('tribeSelectDontCloseOnClick', tribeSelectDontCloseOnClick)
+        .directive('tribeSelectFetchOnSelect', ['$log', tribeSelectFetchOnSelect])
+        .directive('tribeSelectOnTab', ['$timeout', tribeSelectOnTab])
+        .directive('tribeSelectMultipleFocusHelper', ['$log', tribeSelectMultipleFocusHelper])
+        .directive('tribeSelectOnEsc', ['$document', tribeSelectOnEsc])
+        .directive('tribeSelectBackspaceCancelReset', tribeSelectBackspaceCancelReset);
 
     function tribeSelectPreventTab($timeout) {
         return {
             restrict: 'A',
-            require: ['uiSelect', 'ngModel'],
+            require: 'uiSelect',
             replace: false,
             link: link
         };
 
-        function link(scope, element, attrs, crtl) {
-            let uiSelectCtrl = crtl[0];
+        function link(scope, element, attrs, uiSelectCtrl) {
+            if(attrs.tribeSelectPreventTab !== '' && !(attrs.tribeSelectPreventTab === "true")) {
+                return;
+            }
 
             if (uiSelectCtrl.searchInput) {
-                let ngModelCtrl = crtl[1], singleSelectInitialIndex;
-
                 uiSelectCtrl.searchInput.bindFirst('keydown', function (e) {
+                    //TAB
                     if (e.keyCode === 9) {
                         if (!uiSelectCtrl.multiple) {
-                            uiSelectCtrl.activeIndex = singleSelectInitialIndex;
+                            //prevent ui-select event to fire. This event will select the current selected item in the list
+                            e.stopImmediatePropagation();
 
                             if(uiSelectCtrl.tagging) {
                                 uiSelectCtrl.close(true);
@@ -49,28 +62,6 @@ module tomitribe_select {
                         }
                     }
                 });
-
-                scope.$on('uis:activate', ()=> {
-                    $timeout(()=> {
-                        if (!uiSelectCtrl.multiple) {
-                            $timeout(()=> {
-                                singleSelectInitialIndex = findIndex(ngModelCtrl.$viewValue, ngModelCtrl, uiSelectCtrl);
-                            });
-                        }
-                    });
-                });
-            }
-        }
-
-        function findIndex (initial, ngModelCtrl, uiSelectCtrl) {
-            if(!ngModelCtrl.$viewValue) {
-                return -1;
-            }
-
-            if(initial.hasOwnProperty("id")) {
-                return _.findIndex(uiSelectCtrl.items, {id: initial.id})
-            } else {
-                return _.indexOf(uiSelectCtrl.items, initial)
             }
         }
     }
@@ -101,8 +92,8 @@ module tomitribe_select {
         };
 
         function link(scope, element, attrs, uiSelect) {
-            scope.openOnFocusDelay = angular.isDefined(attrs.openOnFocusDelay) ? parseInt(attrs.openOnFocusDelay) : 0;
-            scope.openOnFocusDelayOnce = angular.isDefined(attrs.openOnFocusDelayOnce) ? attrs.openOnFocusDelayOnce : false;
+            scope.openOnFocusDelay = !isNaN(attrs.openOnFocusDelay) ? parseInt(attrs.openOnFocusDelay || 0) : 0;
+            scope.openOnFocusDelayOnce = angular.isDefined(attrs.openOnFocusDelayOnce) ? !!attrs.openOnFocusDelayOnce : false;
             let timer = null;
             const destroyTimer = () => timer ? $timeout.cancel(timer) : {};
 
@@ -122,11 +113,19 @@ module tomitribe_select {
             }
 
             // multiple selects have no focusser
-            if (uiSelect.multiple) {
-                angular.element(uiSelect.focusInput).on('focus', focusHandler);
-            } else {
-                angular.element(uiSelect.focusser).on('focus', focusHandler);
+            const focusser = uiSelect.multiple ? uiSelect.focusInput : uiSelect.focusser;
+            const focusElem = angular.element(focusser);
+
+            const setListeners = () => {
+              angular.element(focusElem).off('focus', focusHandler);
+              $timeout( () => {
+                angular.element(focusElem).on('focus', focusHandler);
+              }, 300);
             }
+
+            setListeners();
+            // Prevent open dropdown on window focus (TAG-3289)
+            window.addEventListener("focus", setListeners);
 
             angular.element(uiSelect.focusInput).on('blur', ()=> {
                 destroyTimer();
@@ -151,15 +150,17 @@ module tomitribe_select {
                    () => {
                        autoOpen = true;
                    },
-                   scope.openOnFocusDelay + 250 // https://github.com/angular-ui/ui-select/issues/428#issuecomment-206684328
+                   scope.openOnFocusDelay + 750 // https://github.com/angular-ui/ui-select/issues/428#issuecomment-206684328
                 );
             });
 
             scope.$on('$destroy', () => {
+                window.removeEventListener("focus", setListeners);
                 destroyTimer();
             });
         }
     }
+
 
     function tribeSelectFetchOnOpen() {
         return {
@@ -170,11 +171,40 @@ module tomitribe_select {
         };
 
         function link(scope, element, attrs, uiSelectCtrl) {
+            if(attrs.tribeSelectFetchOnOpen && _.isFunction(scope.$parent[attrs.tribeSelectFetchOnOpen])) {
+                scope.$on('uis:close', ()=> {
+                    scope.$parent[attrs.tribeSelectFetchOnOpen]();
+                });
+            }
+
             scope.$on('uis:activate', ()=> {
                 if(attrs['refresh']) {
                     uiSelectCtrl.refresh(attrs['refresh']);
                 }
             });
+        }
+    }
+
+    function tribeSelectSaveSearch() {
+        return {
+            require: '^uiSelect',
+            replace: false,
+            link: link
+        };
+        function link(scope, element, attrs, uiSelect) {
+            // let default key be id
+            const key = attrs.tribeSelectSaveSearch || 'id';
+            // prevent input clear on select
+            uiSelect.resetSearchInput = false;
+            // copy selected attr to search field
+            const choiceToSearch = () => {
+                let search = angular.isObject(uiSelect.selected) ? uiSelect.selected[key] : uiSelect.selected;
+                if(search) {
+                    uiSelect.search = search
+                }
+            };
+            scope.$on('uis:select', choiceToSearch);
+            scope.$on('uis:close', choiceToSearch);
         }
     }
 
@@ -185,82 +215,180 @@ module tomitribe_select {
             template: require('./tomitribe-pagination-loader.jade'),
             require: '^uiSelect',
             scope: {
-                item: '=',
                 pagingState: '=',
                 pagingBusy: '=',
-                containerClass: '@',
-                refresh: '&',
-                itemName: '@'
+                refresh: '&'
             },
             link: link
         };
 
         function link(scope, element, attrs, ctrl) {
             scope.$select = ctrl;
-
-            scope.$watch("$select.items", (nv, ov)=> {
-                if(nv) {
-                    //Count all excluding : new tags and $$loader
-                    scope.$$listTotal = nv.reduce((res, item) => {
-                        if((item['isTag'] === undefined || !item['isTag']) && (item['$$loader'] === undefined || !item['$$loader'])) {
-                            res++;
-                        }
-                        return res;
-                    }, 0);
-                }
-            });
+            scope.collectionContainer = element.parents('.ui-select-choices-content')[0];
         }
     }
 
-    function tribeSelectPaginationControl() {
+    function tribeSelectMaxLength() {
         return {
             restrict: 'A',
             replace: false,
-            scope: {
-                items: '=',
-                pagingBusy: '=',
-                total: '='
-            },
+            require: 'uiSelect',
             link: link
         };
 
-        function link(scope, element, attrs, ctrl) {
-            scope.$watch("pagingBusy", (nv, ov)=> {
-                if (ov !== undefined && nv !== undefined) {
-                    if (!!ov && !nv) {
-                        //when loading finish
-                        //when we don't have any items, do not show load more
-                        if (scope.items && scope.items.length > 0) {
-                            scope.items.push({
-                                $$loader: true,
-                                total: scope.total
-                            });
-                        }
-                    } else if (!ov && !!nv) {
-                        //loading start
-                        removeLoadMoreOption();
-                    }
-                }
-            });
-
-            function removeLoadMoreOption() {
-                if (isLastLoadMoreOption()) {
-                    scope.items.pop();
-                }
-            }
-
-            function isLastLoadMoreOption() {
-                if (scope.items) {
-                    let last = _.last(scope.items);
-
-                    if (last) {
-                        return last['$$loader'];
-                    }
-                }
-                return false;
+        function link(scope, element, attrs, uiSelectCtrl) {
+            if (uiSelectCtrl.searchInput && uiSelectCtrl.searchInput.length > 0) {
+                uiSelectCtrl.searchInput.attr("maxlength", attrs.tribeSelectMaxLength);
             }
         }
     }
+
+    function tribeSelectRedrawOnTagging() {
+      return {
+        restrict: 'A',
+        replace: false,
+        require: '^uiSelect',
+        link: link
+      };
+
+      function link(scope, element, attrs, uiSelect) {
+        scope.$watchCollection('$select.items', () => {
+            if (scope.calculateDropdownPos) scope.calculateDropdownPos();
+        })
+      }
+    }
+
+    function tribeSelectOnTab($timeout) {
+        return {
+            restrict: 'A',
+            require: 'uiSelect',
+            replace: false,
+            link: link
+        };
+        function link(scope, element, attrs, uiSelect) {
+            if(attrs.tribeSelectOnTab !== '' && !(attrs.tribeSelectOnTab === "true")) {
+                return;
+            }
+            if (uiSelect.searchInput) {
+                uiSelect.searchInput.bindFirst('keydown', function (e) {
+                    if (e.keyCode === 9) {
+                        if (!uiSelect.multiple) {
+                            uiSelect.selected = uiSelect.items[uiSelect.activeIndex];
+                            uiSelect.search = uiSelect.items[uiSelect.activeIndex];
+                            $timeout(() => {
+                                uiSelect.select(uiSelect.items[uiSelect.activeIndex], true);
+                            });
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    function tribeSelectDontCloseOnClick() {
+      return {
+          restrict: 'A',
+          require: 'uiSelect',
+          replace: false,
+          link: link
+      };
+      function link(scope, element, attrs, ctrl) {
+          ctrl.searchInput.off('click').on('click', (event) => {
+            if (ctrl.open) event.stopPropagation();
+          })
+      }
+    }
+
+    function tribeSelectFetchOnSelect($log) {
+      return {
+        restrict: 'A',
+        replace: false,
+        require: '^uiSelect',
+        link: link
+      };
+
+      function link(scope, el, attrs, uiSelect) {
+        const fetchItemsCount = parseInt(attrs.fetchItemsCount) || 10;
+
+        if (!attrs.refresh) {
+          $log.warn('tribe-select-refresh-on-list-drain requires refresh attribute!')
+          return;
+        }
+
+        scope.$on('uis:select', () => {
+          if (uiSelect.items.length < fetchItemsCount) uiSelect.refresh(attrs.refresh);
+        });
+      }
+    }
+
+    function tribeSelectOnEsc($document) {
+        return {
+            restrict: 'A',
+            require: 'uiSelect',
+            replace: false,
+            link: link
+        };
+
+        function link(scope, element, attrs, uiSelectCtrl) {
+            if (attrs.tribeSelectOnEsc && document.querySelectorAll(attrs.tribeSelectOnEsc).length && uiSelectCtrl.searchInput) {
+                uiSelectCtrl.searchInput.bindFirst('keydown', function (event) {
+                    //we cannot trust in uiSelectCtrl.open: its only updated after this event
+                    if (event.keyCode === 27 && element.find('.ui-select-choices').hasClass('ng-hide')) {
+                        event.stopImmediatePropagation();
+                        //Create new event and fire in $document
+                        $document.trigger($.Event('keydown', {keyCode: 27, which: 27}));
+                    }
+                });
+            }
+        }
+    }
+
+    function tribeSelectMultipleFocusHelper($log) {
+        return {
+            restrict: 'A',
+            require: 'uiSelect',
+            replace: false,
+            link: link
+        }
+
+        function link($scope, elem, attrs, uiSelect) {
+            if (!uiSelect.multiple) {
+                $log.warn('tribeSelectMultipleFocusHelper should be used along with multiple attribute!');
+                return;
+            }
+            uiSelect.closeOnSelect = false;
+
+            $scope.$on('uis:select', () => {
+                uiSelect.focusInput.focus();
+            })
+
+            uiSelect.onRemoveCallback = _.wrap(uiSelect.onRemoveCallback, (cb, ...args) => {
+              cb(...args);
+              uiSelect.focusInput.focus();
+            })
+        }
+    }
+
+    function tribeSelectBackspaceCancelReset() {
+        return {
+            restrict: 'A',
+            require: 'uiSelect',
+            replace: false,
+            link: link
+        };
+
+        function link(scope, element, attrs, uiSelectCtrl) {
+            //Only for single select, prevent backspace to reset the modal
+            if (uiSelectCtrl.focusser && _.isUndefined(uiSelectCtrl.multiple) && !uiSelectCtrl.tagging.isActivated) {
+                uiSelectCtrl.focusser.bindFirst('keydown', function (e) {
+                    if (e.keyCode === 8) {
+                        e.stopImmediatePropagation();
+                    }
+                });
+            }
+        }
+    }
+
     // todo: fix proper interfacing
     (<any>$).fn.bindFirst = function (name, fn) {
         this.on(name, fn);

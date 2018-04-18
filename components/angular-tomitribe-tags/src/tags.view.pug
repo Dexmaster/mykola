@@ -1,8 +1,71 @@
-ui-select.tags-dropdown(multiple, tagging="stringToTagReference", tagging-tokens="ENTER|,", ng-model="self.ngModel", sortable="true", tribe-tags-on-blur, name="tags", tribe-tagging-validator, displayed-property="name", tabindex="0", tribe-select-open-on-focus, tribe-select-prevent-tab)
-  ui-select-match(class="{{$item.$$invalid ? 'invalid' : ''}}", placeholder="Select tag...") {{$item.name}}
-  ui-select-choices(tribe-select-pagination-control, items="availableTags", paging-busy="$$pagingBusy", total="$$total", ui-disable-choice="tag.$$loader", repeat="tag in availableTags", group-by="groupSuggestions", ng-show="$select.items.length &&", refresh="loadTagsProposals($select.search)", refresh-delay="0", position="{{position}}")
-    div(tribe-activate-hover="tag", ng-if="!tag.$$loader")
-      span(ng-if="!tag.isTag", ng-bind-html="tag.name + tag.isTag| highlight: $select.search")
-      span(ng-if="tag.isTag", ng-bind-html="(tag.name | highlight: $select.search) + ' (new)'")
-    tribe-select-pagination-loader(item="tag", item-name="tags", paging-state="$$pagingState", paging-busy="$$pagingBusy", container-class="tags-dropdown", refresh="loadTagsProposals($select.search)")
-p(class="validation-message" ng-show="form.tags.$error.tagging && (!form.tags.$pristine || form.$submitted)") {{validationErrorMessage}}
+ui-select.tags-dropdown(
+ng-model="self.ngModel",
+
+tabindex="0",
+sortable="true",
+
+multiple,
+tribe-select-multiple-focus-helper,
+
+tagging="stringToTagReference",
+tagging-tokens="ENTER|,",
+
+name="{{fieldName}}",
+
+tribe-tagging-validator,
+validation-key="name",
+on-remove="refreshDuplicateValidation($select.selected)",
+
+tribe-tags-on-blur,
+tribe-select-open-on-focus,
+tribe-select-prevent-tab,
+tribe-select-on-esc=".modal",
+)
+  ui-select-match(
+  class="{{$item.$$invalid ? 'invalid' : ''}}",
+  placeholder="Select tag..."
+  ) {{$item.name}}
+  ui-select-choices.has-header.has-footer(
+  ng-show="$select.items.length &&",
+  repeat="tag in availableTags",
+
+  select-choices-header="Suggestions",
+  select-choices-footer="{{$select.items.length + $select.selected.length}} of {{$$total}} tags are displayed {{ $select.items.length + $select.selected.length < $$total ? '(Scroll for more)' : '(All tags loaded)' }}",
+
+  refresh="loadTagsProposals($select.open, $select.search)",
+  refresh-delay="400",
+  position="{{position}}"
+
+  tribe-select-fetch-on-select,
+  fetch-items-count="10",
+
+  tribe-select-fetch-on-open="resetTagsProposals",
+  tribe-select-redraw-on-tagging
+  )
+    div(
+    tribe-activate-hover="tag"
+    )
+      //- tag
+      span(
+      ng-if="!tag.isTag",
+      ng-bind-html="tag.name + tag.isTag| highlight: $select.search"
+      )
+      //- new
+      span(
+      ng-if="tag.isTag && !tag.$$duplicate",
+      ng-bind-html="(tag.name | highlight: $select.search) + ' (new)'"
+      )
+      //- duplicate
+      span(
+      ng-if="tag.isTag && tag.$$duplicate",
+      ng-bind-html="(tag.name | highlight: $select.search)"
+      )
+    tribe-select-pagination-loader(
+    ng-if="$last",
+    paging-state="$$pagingState",
+    paging-busy="$$pagingBusy",
+    refresh="loadTagsProposals($select.open, $select.search)"
+    )
+p.validation-message(
+ng-show="form[fieldName].$error.tagging && (!form[fieldName].$pristine || form.$submitted)"
+) {{validationErrorMessage}}

@@ -1,3 +1,5 @@
+import {TagReference} from "./tags.service";
+
 export class TagsConfigurer {
     tagsEndpoint = 'api/label/available';
     sortFn = (items) => {
@@ -17,11 +19,21 @@ export class TagsConfigurer {
             maxLength: 64,
 
             errorMessage(): string {
-                return "Inputs must be alphanumeric, dot, space, scores and cannot exceed " + this.maxLength + " chars. Please remove invalid entry(s).";
+                return "Inputs must be alphanumeric, dot, space, scores and cannot exceed " + this.maxLength + " chars. Please remove invalid or duplicated entry(s).";
             },
-            isValid(input: any): boolean {
-                var regex = new RegExp(this.pattern);
-                return (input && input.length <= this.maxLength && regex.test(input));
+
+            isValid(tagName: string, tags?: Array<any>, inputValdatorCheck:boolean = false): boolean {
+                const regex = new RegExp(this.pattern);
+
+                const lessThanMax = tagName.length <= this.maxLength;
+                const passesRegex = regex.test(tagName);
+                const notDuplicate = tags ? tags.filter((tag: TagReference) => tag.name === tagName).length <= (inputValdatorCheck ? 1 : 0): true;
+
+                return tagName && lessThanMax && passesRegex && notDuplicate;
+            },
+
+            isDuplicate(tagName: string, tags: Array<any>): boolean {
+                return tags ? !(tags.filter((tag: TagReference) => tag.name === tagName).length <= 1) : false;
             }
         }
     }

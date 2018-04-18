@@ -1,15 +1,16 @@
 {
   "name": "angular-tomitribe-tags",
-  "version": "0.0.21",
+  "version": "0.0.44",
   "description": "Tomitribe tags input",
   "repository": "https://github.com/tomitribe/mykola/tree/master/components/angular-tomitribe-tags",
   "license": "MIT",
   "main": "index.ts",
   "dependencies": {
     "angular-tomitribe-common": "^0.0.1",
-    "angular-tomitribe-select": "^0.0.11",
+    "angular-tomitribe-select": "^0.0.37",
     "angular": "^1.5.8",
     "angular-sanitize": "^1.5.8",
-    "ui-select": "^0.19.6"
+    "ui-select": "^0.19.6",
+    "underscore": "1.8.3"
   }
 }

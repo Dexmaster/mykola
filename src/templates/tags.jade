@@ -12,10 +12,10 @@ div
             tribe-tags(ng-model="tags").col-sm-12
 
             h3 Tags (dropdown open up)
-            tribe-tags(ng-model="tags1", position="up").col-sm-12
+            tribe-tags(ng-model="tags1", field-name="tags1", position="up").col-sm-12
 
             h3 Tags (dropdown open down)
-            tribe-tags(ng-model="tags2", position="down").col-sm-12
+            tribe-tags(ng-model="tags2", field-name="tags2", position="down").col-sm-12
         div(ng-if="tags.length").col-sm-6
           h3 Selected Tags
           ul

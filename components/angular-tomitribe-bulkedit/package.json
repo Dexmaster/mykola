@@ -1,11 +1,13 @@
 {
   "name": "angular-tomitribe-bulkedit",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Tomitribe component for bulk edit",
   "repository": "https://github.com/tomitribe/tree/master/components/angular-tomitribe-bulkedit",
   "license": "MIT",
   "main": "index.ts",
   "dependencies": {
-    "angular-tomitribe-common": "^0.0.5"
+    "angular-tomitribe-common": "^0.0.5",
+    "angular": "^1.5.8",
+    "underscore": "1.8.3"
   }
 }

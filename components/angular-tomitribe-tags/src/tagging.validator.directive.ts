@@ -1,19 +1,33 @@
+let _ = require('underscore');
+
+import {TagReference} from "./tags.service";
 export class TaggingValidatorDirective implements ng.IDirective {
-    require = "ngModel";
+    restrict = 'A';
+    require = ["ngModel", "uiSelect"];
+    replace = false;
 
     constructor(private tagConfigurer) {
     }
 
-    link: ng.IDirectiveLinkFn = (scope, el: angular.IAugmentedJQuery, attrs: any, ctrl: any): void => {
-        var me = this;
+    link: ng.IDirectiveLinkFn = (scope, el: angular.IAugmentedJQuery, attrs: any, ctrls: Array<any>): void => {
+        const validationKey = attrs.validationKey || 'name';
+        const [ngModel, uiSelect] = ctrls;
 
-        ctrl.$validators.tagging = function (modelValue, viewValue) {
+        scope.$parent.applyTaggingValidation = (tag: TagReference, inputValdatorCheck:boolean = false) => {
+            // check duplication on collection without this element
+            const pureSelected = _.without(uiSelect.selected, tag);
+            tag['$$invalid']   = !this.tagConfigurer.validation.default.isValid(tag.name, pureSelected, inputValdatorCheck);
+            tag['$$duplicate'] = this.tagConfigurer.validation.default.isDuplicate(tag.name, pureSelected);
+            return tag;
+        }
+
+        ngModel.$validators.tagging = (modelValue, viewValue) => {
             if (modelValue) {
-                for (let model of modelValue) {
-                    if (!me.tagConfigurer.validation.default.isValid(model[attrs.displayedProperty])) return false;
-                }
+              const allValid = modelValue.reduce( (acc, model) => {
+                  return acc && this.tagConfigurer.validation.default.isValid(model[validationKey], modelValue, true);
+              }, true);
+              return allValid
             }
-
             return true;
         };
     }

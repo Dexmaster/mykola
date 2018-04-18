@@ -1,1 +1,8 @@
-div.fab(ng-transclude ng-class="dynamicClass" ng-mouseenter="showIt()" ng-mouseleave="hideIt()", tabindex=0, ng-keydown="onKeyDown($event)")
+div.fab(
+ng-class="dynamicClass",
+ng-keydown="keyDown($event)",
+ng-mouseenter="showIt()",
+ng-mouseleave="hideIt()",
+ng-transclude,
+tabindex=0,
+)

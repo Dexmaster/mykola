@@ -13,6 +13,9 @@ export class TagsOnBlurDirective {
 
   require = 'uiSelect';
   link = (scope, element, attributes, controller) => {
+    if(attributes.tribeTagsOnBlur !== '' && !(attributes.tribeTagsOnBlur === "true")) {
+      return;
+    }
     controller.searchInput.on('blur', () => {
       this.$timeout(() => {
         if (controller.search == '') {

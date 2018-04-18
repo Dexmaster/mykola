@@ -3,42 +3,43 @@ div
         div.col-xs-12
             div.meta
                 div.title Select
-    div.page
-        div.panel
-            div.row
-                div.col-sm-12
-                    div(class="form-group")
+    .page
+        .panel
+            .row
+                .col-sm-12
+                    .form-group
                         h3 All input fields should be navigable using TAB
 
-                        div.col-sm-6
+                        .col-sm-6
                             p
                                 h4 Username
                                 input(type="text", ng-model="username", placeholder="Username", class="form-control", autofocus)
 
                             p
                                 h4 Simple Select (empty)
-                                ui-select(ng-model="myAge1", tabindex="0", tribe-select-open-on-focus, tribe-select-prevent-tab)
+                                ui-select(ng-model="myAge1", tabindex="0", tribe-select-dont-close-on-click, tribe-select-open-on-focus, tribe-select-prevent-tab, tribe-select-max-length="40")
                                     ui-select-match(placeholder="Select Age...")
                                         span {{$select.selected}}
-                                    ui-select-choices(repeat="age in (ages | filter: $select.search)", refresh="loadAgesDummy()", tribe-select-fetch-on-open)
+                                    ui-select-choices(repeat="age in (ages | filter: $select.search)", refresh="loadAgesDummy()", tribe-select-fetch-on-open="executeSelectFetchOnOpen")
                                         span(ng-bind-html="age | highlight: $select.search")
                             p
                                 h4 Simple Select (with default value)
-                                ui-select(ng-model="myAge2", tabindex="0", tribe-select-open-on-focus, tribe-select-prevent-tab)
+                                ui-select(ng-model="myAge2", tabindex="0", tribe-select-open-on-focus, tribe-select-prevent-tab, tribe-select-backspace-cancel-reset)
                                     ui-select-match(placeholder="Select Age...")
                                         span {{$select.selected}}
                                     ui-select-choices(repeat="age in (ages | filter: $select.search)")
                                         span(ng-bind-html="age | highlight: $select.search")
                             p
-                                h4 Select multiple + (close-on-select="false")
+                                h4 Select multiple, keep opened on select
                                 ui-select(
-                                multiple,
                                 ng-model="myAge3",
                                 tabindex="0",
                                 tribe-select-open-on-focus,
                                 tribe-select-prevent-tab,
                                 tagging="tagNull",
-                                close-on-select="false"
+
+                                multiple,
+                                tribe-select-multiple-focus-helper
                                 )
                                     ui-select-match(placeholder="Select Age...")
                                         span {{$item}}
@@ -84,3 +85,17 @@ div
                                         div(tribe-activate-hover="age", ng-if="!age.$$loader")
                                             span(ng-bind-html="age | highlight: $select.search")
                                         tribe-select-pagination-loader(item="age", item-name="ages", paging-state="$$pagingState", paging-busy="$$pagingBusy", container-class="ages-dropdown", refresh="loadAges()")
+                            p
+                                h4 Select simple with search save
+                                ui-select(ng-model="myAge9", tabindex="0", tribe-select-open-on-focus, tribe-select-prevent-tab)
+                                    ui-select-match(placeholder="Select...", tribe-select-save-search="name")
+                                        span {{$select.selected.name}}
+                                    ui-select-choices(repeat="item in (sampleObjects | filter: $select.search)")
+                                        span(ng-bind-html="item.name | highlight: $select.search")
+                            p
+                                h4 Simple Select (empty)
+                                ui-select(ng-model="myAge10", tabindex="0", tribe-select-dont-close-on-click, tribe-select-open-on-focus, tribe-select-prevent-tab="{{allowTabCondition}}", tribe-select-on-tab="{{!allowTabCondition}}", tribe-select-max-length="40")
+                                    ui-select-match(placeholder="Select Age...")
+                                        span {{$select.selected}}
+                                    ui-select-choices(repeat="age in (ages | filter: $select.search)", refresh="loadAgesDummy()", tribe-select-fetch-on-open)
+                                        span(ng-bind-html="age | highlight: $select.search")

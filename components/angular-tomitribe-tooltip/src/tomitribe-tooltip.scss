@@ -15,11 +15,17 @@
 .tooltip-is-active {
   opacity: 1;
 
-  &.tooltip-top {
+  &.tooltip-top,
+  &.tooltip-top-left,
+  &.tooltip-top-middle,
+  &.tooltip-top-right {
      transform: translateY(-14px);
   }
 
-  &.tooltip-bottom {
+  &.tooltip-bottom,
+  &.tooltip-bottom-left,
+  &.tooltip-bottom-middle,
+  &.tooltip-bottom-right {
     transform: translateY(14px);
   }
 
@@ -51,7 +57,10 @@
 }
 
 // Tooltip direction modifiers
-.tooltip-top {
+.tooltip-top,
+.tooltip-top-left,
+.tooltip-top-middle,
+.tooltip-top-right {
   .tooltip__label::after{
     top: 100%;
     left: 50%;
@@ -65,7 +74,10 @@
 
 }
 
-.tooltip-bottom {
+.tooltip-bottom,
+.tooltip-bottom-left,
+.tooltip-bottom-middle,
+.tooltip-bottom-right {
   .tooltip__label::after{
     bottom: 100%;
     left: 50%;

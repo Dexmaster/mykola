@@ -1,0 +1,30 @@
+.ui-select-match {
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+.ui-select-choices{
+    &.has-header,
+    &.has-footer {
+        &:before, &:after {
+            padding: 6px 8px;
+            display: block;
+            box-sizing: border-box;
+        }
+    }
+    &.has-header{
+        &:before {
+            content: attr(select-choices-header);
+            font-weight: 700;
+            border-bottom: dotted #e2e1e1 2px;
+        }
+    }
+    &.has-footer {
+        &:after {
+            content: attr(select-choices-footer);
+            font-weight: 300;
+            border-top: dotted #e2e1e1 2px;
+            white-space: normal;
+        }
+    }
+}

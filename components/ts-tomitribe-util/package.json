@@ -1,0 +1,10 @@
+{
+  "name": "ts-tomitribe-util",
+  "version": "0.0.1",
+  "description": "Tomitribe utilities converted for ts usage.",
+  "repository": "https://github.com/tomitribe/mykola/tree/master/components/ts-tomitribe-util",
+  "license": "MIT",
+  "main": "index.ts",
+  "dependencies": {
+  }
+}

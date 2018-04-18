@@ -98,6 +98,7 @@ module tomitribe_bulkbar {
         .directive('tribeClick', tribeclick);
 
     function tribebulkbar() {
+        let _ = require('underscore');
         return {
             restrict: 'E',
             template: require('./tomitribe-bulkedit.jade'),
@@ -137,11 +138,11 @@ module tomitribe_bulkbar {
         function bulkEditController($scope, $document) {
             $scope.$watchCollection(
                 function () {
-                    var selectedItems = [];
+                    let selectedItems = [], itemsCount = 0;
                     if (!!$scope.listItems) {
                         if ($scope.listItems.length > 0 || (angular.isArray($scope.listProp) && !angular.isArray($scope.listItems))) {
                             if ($scope.listProp.length) {
-                                $scope.itemsCount = 0;
+                                itemsCount = 0;
                                 angular.forEach($scope.listProp, function (prop) {
                                     let arr = getDescendantProp($scope.listItems, prop.path);
                                     if (arr && angular.isArray(arr)) {
@@ -149,40 +150,49 @@ module tomitribe_bulkbar {
                                             if ($scope.multiField && prop.type) item[$scope.multiField] = prop.type;
                                             if (item[$scope.selectField]) selectedItems.push(item);
                                         });
-                                        $scope.itemsCount += arr.length;
+                                        itemsCount += arr.length;
                                     }
                                 });
                             } else {
                                 angular.forEach($scope.listItems, function (item) {
                                     if (item[$scope.selectField]) selectedItems.push(item);
                                 });
-                                $scope.itemsCount = $scope.listItems.length;
+                                itemsCount = $scope.listItems.length;
                             }
                         }
                     }
+                    if ($scope.itemsCount !== itemsCount) $scope.itemsCount = itemsCount;
                     return selectedItems;
-                }, function (data) {
-                    $scope.selectedCount = data.length;
-                    $scope.selectedItems = data;
-                    if ($scope.itemsCount > 0) {
-                        $scope.allChecked = (data.length === $scope.itemsCount);
-                        $scope.noneChecked = (data.length === 0);
-                        if (typeof $scope.options === 'object') {
-                            if ($scope.options.hasOwnProperty('allChecked')
-                                && $scope.options.allChecked !== $scope.allChecked) {
-                                $scope.options.allChecked = $scope.allChecked;
-                            }
-                            if ($scope.options.hasOwnProperty('noneChecked')
-                                && $scope.options.noneChecked !== $scope.noneChecked) {
-                                $scope.options.noneChecked = $scope.noneChecked;
-                            }
-                        }
-                    }
+                }, function (selectedItems) {
+                    $scope.selectedCount = selectedItems.length;
+                    $scope.selectedItems = selectedItems;
+                    $scope.updateChecks();
                     if ((typeof $scope.options === 'object')
                         && $scope.options.hasOwnProperty('selectedCount')) {
                         $scope.options.selectedCount = $scope.selectedCount;
                     }
                 }, true);
+
+            $scope.updateChecks = _.debounce(function () {
+                if ($scope.itemsCount > 0) {
+                    $scope.allChecked = ($scope.selectedItems.length === $scope.itemsCount);
+                    $scope.noneChecked = ($scope.selectedItems.length === 0);
+                    if (typeof $scope.options === 'object') {
+                        if ($scope.options.hasOwnProperty('allChecked')
+                            && $scope.options.allChecked !== $scope.allChecked) {
+                            $scope.options.allChecked = $scope.allChecked;
+                        }
+                        if ($scope.options.hasOwnProperty('noneChecked')
+                            && $scope.options.noneChecked !== $scope.noneChecked) {
+                            $scope.options.noneChecked = $scope.noneChecked;
+                        }
+                    }
+                }
+            }, 100, true);
+
+            $scope.$watch('itemsCount', (nv, pv) => {
+                if (nv !== pv) $scope.updateChecks();
+            });
 
             $scope.checkAll = function (state) {
                 if (typeof state === "boolean") {
